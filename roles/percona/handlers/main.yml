@@ -1,0 +1,13 @@
+---
+
+- name: restart pacemaker
+  service: name=pacemaker state=restarted
+
+- name: restart haproxy
+  service: name=haproxy state=restarted
+
+- name: reload sysctl
+  command: sysctl -p
+
+- name: restart xinetd
+  service: name=xinetd state=restarted

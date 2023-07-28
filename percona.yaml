@@ -1,0 +1,12 @@
+---
+- hosts : node
+  roles : 
+    - role: percona
+      tags: percona
+      vars:
+        floating_ip: 185.88.135.162
+        node1: 1
+        node2: 2
+        node3: 3
+        user_name: hacluster
+        user_password: TestParola2!

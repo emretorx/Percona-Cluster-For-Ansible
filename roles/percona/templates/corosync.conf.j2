@@ -1,0 +1,38 @@
+totem {
+    version: 2
+    cluster_name: vargo-cluster
+    transport: knet
+    crypto_cipher: aes256
+    crypto_hash: sha256
+}
+
+nodelist {
+    node {
+        ring0_addr: {{ hostvars['node1']['ansible_host'] }}
+        name: node1
+        nodeid: 1
+    }
+
+    node {
+        ring0_addr:{{ hostvars['node2']['ansible_host'] }}
+        name: node2
+        nodeid: 2
+    }
+
+    node {
+        ring0_addr: {{ hostvars['node3']['ansible_host'] }}
+        name: node3
+        nodeid: 3
+    }
+}
+
+quorum {
+    provider: corosync_votequorum
+}
+
+logging {
+    to_logfile: yes
+    logfile: /var/log/corosync/corosync.log
+    to_syslog: yes
+    timestamp: on
+}

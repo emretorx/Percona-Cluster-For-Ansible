@@ -1,0 +1,13 @@
+---
+
+node:
+  hosts:
+    node1:
+      ansible_host: NODE1IPADRESI
+      ansible_numb: 1
+    node2:
+      ansible_host: NODE2IPADRESI
+      ansible_numb: 2
+    node3:
+      ansible_host: NODE3IPADRESI
+      ansible_numb: 3

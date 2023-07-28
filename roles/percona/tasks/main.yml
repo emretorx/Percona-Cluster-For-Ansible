@@ -1,0 +1,149 @@
+---
+- name: Percona Install tasks
+  debug:
+    msg: "Percona Install tasks"
+
+- name: set timezone europe istanbul
+  command: timedatectl set-timezone Europe/Istanbul
+
+- name: install percona required packages
+  apt:  
+    name: ['wget', 'gnupg2', 'lsb-release', 'curl', 'screen'] 
+    state: present
+
+- name: copy percona-release
+  copy: src=percona-release_latest.generic_all.deb dest=/tmp/percona-release_latest.generic_all.deb owner=root group=root mode=0644 backup=yes
+
+- name: install .deb package
+  command: dpkg -i /tmp/percona-release_latest.generic_all.deb
+
+- name: set percona release
+  command: percona-release setup pxc-80
+
+- name: install percona xtradb cluster
+  apt:  
+    name: ['percona-xtradb-cluster', 'haproxy', 'xinetd', 'percona-xtrabackup-80'] 
+    state: present
+
+- name: my.cnf
+  template: src=my.cnf.j2 dest=/etc/mysql/mysql.conf.d/mysqld.cnf  owner=root group=root mode=0644
+
+- name: galera-monitor
+  template: src=galera-monitor.j2 dest=/etc/xinetd.d/galera-monitor owner=root group=root mode=0644 backup=yes
+
+- name: sysctl.conf
+  copy: src=sysctl.conf dest=/etc/sysctl.conf owner=root group=root mode=0644 backup=yes
+  notify: [ 'reload sysctl' ]
+
+- name: server-key.pem
+  copy: src=server-key.pem dest=/var/lib/mysql/server-key.pem owner=mysql group=mysql mode=0644 backup=yes
+
+- name: server-cert.pem 
+  copy: src=server-cert.pem dest=/var/lib/mysql/server-cert.pem owner=mysql group=mysql mode=0644 backup=yes
+
+- name: ca.pem 
+  copy: src=ca.pem dest=/var/lib/mysql/ca.pem owner=mysql group=mysql  mode=0644 backup=yes
+
+- name: /etc/services add mysql check 
+  copy: src=services dest=/etc/services owner=root group=root  mode=0644 backup=yes
+  notify: [ 'restart xinetd' ]
+
+- name: install pacemaker corosync 
+  apt:
+    name: ['pacemaker', 'corosync', 'pcs', 'pacemaker-cli-utils']
+    state: present
+
+- name: Creates directory
+  file:
+    path: /var/log/cluster
+    state: directory
+
+- name: corosync.conf
+  template: src=corosync.conf.j2 dest=/etc/corosync/corosync.conf owner=root group=root  mode=0644 backup=yes
+
+- name: hosts
+  template: src=hosts.j2 dest=/etc/hosts owner=root group=root  mode=0644 backup=yes
+
+- name: haproxy.cfg
+  template: src=haproxy.cfg.j2 dest=/etc/haproxy/haproxy.cfg owner=root group=root mode=0644 backup=yes
+#  notify: [ 'start haproxy' ]
+
+- name: "mysql bootstrap only node1"
+  systemd:
+    name: "mysql@bootstrap"
+    state: started
+  when: inventory_hostname == 'node1'
+
+- name: "mysql start only node2"
+  systemd:
+    name: "mysql"
+    state: started
+  when: inventory_hostname == 'node2'
+
+- name: "mysql start only node3"
+  systemd:
+    name: "mysql"
+    state: started
+  when: inventory_hostname == 'node3'
+
+- name: "mysql stop bootstrap only node1"
+  systemd:
+    name: "mysql@bootstrap"
+    state: stopped
+  when: inventory_hostname == 'node1'
+
+- name: "mysql start only node1"
+  systemd:
+    name: "mysql"
+    state: started
+  when: inventory_hostname == 'node1'
+
+- name: hacluster password change
+  user:
+    name: "hacluster"
+    password: "{{ user_password | password_hash('sha512') }}"
+    update_password: always
+
+- name: Authenticate all nodes
+  when: inventory_hostname == 'node1'
+  command: pcs host auth node1 node2 node3 -u hacluster -p {{ user_password }}
+
+- name: pcs cluster stup
+  when: inventory_hostname == 'node1'
+  command: pcs cluster setup galera-cluster --start node1 node2 node3 --force
+
+- name: pcs resource create
+  when: inventory_hostname == 'node1'
+  command: pcs resource create FloatingIP ocf:heartbeat:IPaddr2 ip={{ floating_ip }} cidr_netmask=24 op monitor interval=5s
+
+- name: pcs resource enable
+  when: inventory_hostname == 'node1'
+  command: pcs resource enable FloatingIP
+
+- name: shoot the other node in the head STONITH false
+  when: inventory_hostname == 'node1'
+  command: pcs property set stonith-enabled=false
+
+- name: no-quroum-policy false
+  when: inventory_hostname == 'node1'
+  command: pcs property set no-quorum-policy=ignore
+
+- name: pcs cluster enabled all host
+  when: inventory_hostname == 'node1'
+  command: pcs cluster enable --all
+
+- name: haproxy_check_service
+  template: src=haproxy_service.j2 dest=/root/haproxy_service.sh  owner=root group=root mode=0644
+
+- name: haproxy service check script
+  become: yes
+  shell: |
+    screen -S haproxy_service -d -m bash /root/haproxy_service.sh
+  ignore_errors: yes 
+
+- name: Add cron job for haproxy_service check
+  cron:
+    name: "haproxy_service"
+    special_time: reboot
+    user: root
+    job: "screen -S haproxy_service -d -m /bin/bash /root/haproxy_service.sh"
