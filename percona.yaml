@@ -4,7 +4,7 @@
     - role: percona
       tags: percona
       vars:
-        floating_ip: 185.88.135.162
+        floating_ip: FLOATING_IP
         node1: 1
         node2: 2
         node3: 3
