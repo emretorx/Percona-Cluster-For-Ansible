@@ -8,9 +8,9 @@ ansible-playbook -i inventory percona.yaml -l node
 <pre>
 <code>
 
-CREATE USER 'clustercheckuser'@'localhost' IDENTIFIED BY 'clustercheckpassword!'; ```
+CREATE USER 'clustercheckuser'@'localhost' IDENTIFIED BY 'clustercheckpassword!'; 
 </code>
 </pre>
 
-GRANT PROCESS ON *.* TO 'clustercheckuser'@'localhost' ; ```
+GRANT PROCESS ON *.* TO 'clustercheckuser'@'localhost' ;
 
