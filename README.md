@@ -1,12 +1,12 @@
 # Ansbile 
 
-apt install ansible -y
+<pre><code>apt install ansible -y</code></pre>
 
-ansible-playbook -i inventory percona.yaml -l node
+<pre><code>ansible-playbook -i inventory percona.yaml -l node </code></pre>
 
 # Clustercheck user
 
 <pre><code>CREATE USER 'clustercheckuser'@'localhost' IDENTIFIED BY 'clustercheckpassword!'; </code></pre>
 
-GRANT PROCESS ON *.* TO 'clustercheckuser'@'localhost' ;
+<pre><code>GRANT PROCESS ON *.* TO 'clustercheckuser'@'localhost';</code></pre>
 
