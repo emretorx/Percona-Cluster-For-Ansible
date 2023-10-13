@@ -1,12 +1,49 @@
-# Ansbile 
+# Percona Cluster Kurulumu için Ansible
 
-<pre><code>apt install ansible -y</code></pre>
+Bu dökümanda, Percona Cluster'ı Ansible aracılığıyla nasıl kurabileceğinizi bulabilirsiniz.
 
-<pre><code>ansible-playbook -i inventory percona.yaml -l node </code></pre>
+## Ön Koşullar
 
-# Clustercheck user
+- **Ansible Sunucusu**: 1 adet
+- **Ubuntu 20 VM'ler**: Ansible sunucusunun anahtar (key) ile erişebileceği 3 adet.
 
-<pre><code>CREATE USER 'clustercheckuser'@'localhost' IDENTIFIED BY 'clustercheckpassword!'; </code></pre>
+## Kurulum Adımları
 
-<pre><code>GRANT PROCESS ON *.* TO 'clustercheckuser'@'localhost';</code></pre>
+1. **Repo'yu Klonlayın**
+   
+   ```bash
+   git clone https://github.com/emretorx/Percona-Cluster-For-Ansibe.git
+   ```
 
+2. **Ansible'ı Kurun**
+
+   ```bash
+   apt install ansible -y
+   ```
+
+3. **Konfigürasyonları Düzenleyin**
+
+   `Percona-Cluster-For-Ansible/percona.yaml` ve `Percona-Cluster-For-Ansible/inventory/nodes.yml` içerisinde bulunan IP adresleri ve parolaların sizin ortamınıza uygun olacak şekilde düzenlenmesi gerekmektedir.
+
+4. **Ansible Playbook'unu Çalıştırın**
+
+   ```bash
+   cd Percona-Cluster-For-Ansible
+   ansible-playbook -i inventory percona.yaml -l node
+   ```
+
+5. **Mysql'da Gerekli Kullanıcıyı Oluşturun**
+
+   ```sql
+   CREATE USER 'clustercheckuser'@'localhost' IDENTIFIED BY 'clustercheckpassword!';
+   GRANT PROCESS ON *.* TO 'clustercheckuser'@'localhost';
+   ```
+
+6. **HAProxy'yi Yeniden Başlatın**
+
+   ```bash
+   pcs status
+   systemctl restart haproxy
+   ```
+
+Bu dökümanı kullanarak Percona Cluster kurulumunu kolayca gerçekleştirebilirsiniz. İyi kurulumlar!
