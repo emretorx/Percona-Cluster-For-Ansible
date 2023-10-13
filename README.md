@@ -1,6 +1,6 @@
-# Percona Cluster Kurulumu için Ansible
+# Ansible İle Percona Cluster Kurulumu
 
-Bu dökümanda, Percona Cluster'ı Ansible aracılığıyla nasıl kurabileceğinizi bulabilirsiniz.
+Bu kılavuzda, Percona Cluster'ın Ansible kullanılarak nasıl kurulacağını öğreneceksiniz.
 
 ## Ön Koşullar
 
@@ -9,13 +9,13 @@ Bu dökümanda, Percona Cluster'ı Ansible aracılığıyla nasıl kurabileceği
 
 ## Kurulum Adımları
 
-1. **Repo'yu Klonlayın**
+1. **Reposu Klonlayın**
    
    ```bash
    git clone https://github.com/emretorx/Percona-Cluster-For-Ansibe.git
    ```
 
-2. **Ansible'ı Kurun**
+2. **Ansible'ı Yükleyin**
 
    ```bash
    apt install ansible -y
@@ -23,7 +23,7 @@ Bu dökümanda, Percona Cluster'ı Ansible aracılığıyla nasıl kurabileceği
 
 3. **Konfigürasyonları Düzenleyin**
 
-   `Percona-Cluster-For-Ansible/percona.yaml` ve `Percona-Cluster-For-Ansible/inventory/nodes.yml` içerisinde bulunan IP adresleri ve parolaların sizin ortamınıza uygun olacak şekilde düzenlenmesi gerekmektedir.
+   `Percona-Cluster-For-Ansible/percona.yaml` ve `Percona-Cluster-For-Ansible/inventory/nodes.yml` dosyalarındaki IP adreslerini ve parolalarını kendi ortamınıza göre ayarlayın.
 
 4. **Ansible Playbook'unu Çalıştırın**
 
@@ -32,7 +32,7 @@ Bu dökümanda, Percona Cluster'ı Ansible aracılığıyla nasıl kurabileceği
    ansible-playbook -i inventory percona.yaml -l node
    ```
 
-5. **Mysql'da Gerekli Kullanıcıyı Oluşturun**
+5. **MySQL'de Gerekli Kullanıcıyı Oluşturun**
 
    ```sql
    CREATE USER 'clustercheckuser'@'localhost' IDENTIFIED BY 'clustercheckpassword!';
@@ -41,9 +41,16 @@ Bu dökümanda, Percona Cluster'ı Ansible aracılığıyla nasıl kurabileceği
 
 6. **HAProxy'yi Yeniden Başlatın**
 
+   Öncelikle `pcs status` komutu ile floating IP'nin hangi node'da olduğunu tespit edin:
+
    ```bash
    pcs status
+   ```
+
+   Tespit ettiğiniz node'da HAProxy'yi yeniden başlatın:
+
+   ```bash
    systemctl restart haproxy
    ```
 
-Bu dökümanı kullanarak Percona Cluster kurulumunu kolayca gerçekleştirebilirsiniz. İyi kurulumlar!
+Bu kılavuzu kullanarak Percona Cluster kurulumunu kolaylıkla gerçekleştirebilirsiniz. Başarılı kurulumlar dileriz!
