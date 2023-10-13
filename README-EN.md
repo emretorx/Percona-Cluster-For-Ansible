@@ -39,7 +39,7 @@ In this guide, you will learn how to set up the Percona Cluster using Ansible.
    GRANT PROCESS ON *.* TO 'clustercheckuser'@'localhost';
    ```
 
-6. **Restart HAProxy on the Right Node**
+6. **Restart HAProxy **
 
    First, use the `pcs status` command to identify on which node the floating IP is active:
 
