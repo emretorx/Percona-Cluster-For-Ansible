@@ -1,0 +1,116 @@
+---
+- name: Percona Install Tasks
+  hosts: all
+  tasks:
+    - name: set timezone to Europe/Istanbul
+      command: timedatectl set-timezone Europe/Istanbul
+
+    - name: download percona-release package
+      get_url:
+        url: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+        dest: /tmp/percona-release_latest.generic_all.deb
+        owner: root
+        group: root
+        mode: '0644'
+        backup: yes
+
+    - name: install .deb package
+      command: dpkg -i /tmp/percona-release_latest.generic_all.deb
+    
+    - name: set percona release
+      command: percona-release setup pxc-80
+
+    - name: install percona xtradb cluster
+      apt:
+        name: ['percona-xtradb-cluster', 'haproxy', 'xinetd', 'percona-xtrabackup-80', 'keepalived']
+        state: present
+
+    - name: Enable services
+      systemd:
+        name: "{{ item }}"
+        enabled: yes
+      loop:
+        - mysql
+        - haproxy
+        - xinetd
+        - keepalived
+        
+    - name: keepalived.conf
+      template: src=keepalived.conf.j2 dest=/etc/keepalived/keepalived.conf  owner=root group=root mode=0644
+     # notify: ['restart keepalived']    
+
+    - name: my.cnf
+      template: src=my.cnf.j2 dest=/etc/mysql/mysql.conf.d/mysqld.cnf  owner=root group=root mode=0644
+
+    - name: galera-monitor
+      template: src=galera-monitor.j2 dest=/etc/xinetd.d/galera-monitor owner=root group=root mode=0644 backup=yes
+
+    - name: server-key.pem
+      copy: src=server-key.pem dest=/var/lib/mysql/server-key.pem owner=mysql group=mysql mode=0644 backup=yes
+
+    - name: server-cert.pem
+      copy: src=server-cert.pem dest=/var/lib/mysql/server-cert.pem owner=mysql group=mysql mode=0644 backup=yes
+
+    - name: ca.pem
+      copy: src=ca.pem dest=/var/lib/mysql/ca.pem owner=mysql group=mysql  mode=0644 backup=yes
+
+    - name: "mysql bootstrap only node1"
+      systemd:
+        name: "mysql@bootstrap"
+        state: started
+      when: inventory_hostname == 'node1'
+
+    - name: "mysql start only node2"
+      systemd:
+        name: "mysql"
+        state: started
+      when: inventory_hostname == 'node2'
+
+    - name: "mysql start only node3"
+      systemd:
+        name: "mysql"
+        state: started
+      when: inventory_hostname == 'node3'
+
+    - name: "mysql stop bootstrap only node1"
+      systemd:
+        name: "mysql@bootstrap"
+        state: stopped
+      when: inventory_hostname == 'node1'
+
+    - name: "mysql start only node1"
+      systemd:
+        name: "mysql"
+        state: started
+      when: inventory_hostname == 'node1'
+
+    - name: haproxy.cfg
+      template: src=haproxy.cfg.j2 dest=/etc/haproxy/haproxy.cfg owner=root group=root mode=0644 backup=yes
+   #   notify: [ 'restart haproxy' ]
+
+    - name: Create MySQL user 'clustercheckuser'
+      command: mysql -e "CREATE USER 'clustercheckuser'@'localhost' IDENTIFIED BY 'clustercheckpassword!';"
+      become: yes
+      become_user: root
+      when: inventory_hostname == 'node1'
+
+    - name: Grant PROCESS privilege to 'clustercheckuser'
+      command: mysql -e "GRANT PROCESS ON *.* TO 'clustercheckuser'@'localhost';"
+      become: yes
+      become_user: root
+      when: inventory_hostname == 'node1'
+
+    - name: "xinetd restart"
+      systemd:
+        name: "xinetd"
+        state: restarted
+
+    - name: "keepalived start"
+      systemd:
+        name: "keepalived"
+        state: started
+
+    - name: "haproxy start"
+      systemd:
+        name: "haproxy"
+        state: restarted

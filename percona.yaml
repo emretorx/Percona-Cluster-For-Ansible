@@ -8,5 +8,7 @@
         node1: 1
         node2: 2
         node3: 3
-        user_name: hacluster
-        user_password: TestParola2!
+        cluster_name: CLUSTER_NAME
+        keepalived_auth_pass: KEEPALIVED_PASS
+        floating_ip: FLOATING_IP_ADRESS
+        interface_name: INTERFACE_NAME Example: eth0, ens3

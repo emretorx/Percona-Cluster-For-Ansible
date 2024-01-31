@@ -5,9 +5,15 @@ node:
     node1:
       ansible_host: NODE1IPADRESI
       ansible_numb: 1
+      node_role: MASTER
+      node_priority: 100
     node2:
       ansible_host: NODE2IPADRESI
       ansible_numb: 2
+      node_role: BACKUP
+      node_priority: 90
     node3:
       ansible_host: NODE3IPADRESI
       ansible_numb: 3
+      node_role: BACKUP
+      node_priority: 90

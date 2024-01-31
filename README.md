@@ -32,25 +32,4 @@ Bu kılavuzda, Percona Cluster'ın Ansible kullanılarak nasıl kurulacağını 
    ansible-playbook -i inventory percona.yaml -l node
    ```
 
-5. **MySQL'de Gerekli Kullanıcıyı Oluşturun**
-
-   ```sql
-   CREATE USER 'clustercheckuser'@'localhost' IDENTIFIED BY 'clustercheckpassword!';
-   GRANT PROCESS ON *.* TO 'clustercheckuser'@'localhost';
-   ```
-
-6. **HAProxy'yi Yeniden Başlatın**
-
-   Öncelikle `pcs status` komutu ile floating IP'nin hangi node'da olduğunu tespit edin:
-
-   ```bash
-   pcs status
-   ```
-
-   Tespit ettiğiniz node'da HAProxy'yi yeniden başlatın:
-
-   ```bash
-   systemctl restart haproxy
-   ```
-
 Bu kılavuzu kullanarak Percona Cluster kurulumunu kolaylıkla gerçekleştirebilirsiniz. Başarılı kurulumlar dileriz!

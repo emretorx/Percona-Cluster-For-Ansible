@@ -1,0 +1,5 @@
+    - job_name: 'tten-ist1-{{ customer }}-monitors'
+      static_configs:
+      - targets: ['{{ target_ip }}:9100']
+        labels:
+          instance: '{{ customer }}-pfsense'

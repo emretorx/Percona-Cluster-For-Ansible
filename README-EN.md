@@ -32,25 +32,4 @@ In this guide, you will learn how to set up the Percona Cluster using Ansible.
    ansible-playbook -i inventory percona.yaml -l node
    ```
 
-5. **Create the Necessary User in MySQL**
-
-   ```sql
-   CREATE USER 'clustercheckuser'@'localhost' IDENTIFIED BY 'clustercheckpassword!';
-   GRANT PROCESS ON *.* TO 'clustercheckuser'@'localhost';
-   ```
-
-6. **Restart HAProxy**
-
-   First, use the `pcs status` command to identify on which node the floating IP is active:
-
-   ```bash
-   pcs status
-   ```
-
-   On the identified node, restart HAProxy:
-
-   ```bash
-   systemctl restart haproxy
-   ```
-
 With this guide, you can effortlessly set up the Percona Cluster. Happy installations!
