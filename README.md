@@ -5,7 +5,7 @@ Bu kılavuzda, Percona Cluster'ın Ansible kullanılarak nasıl kurulacağını 
 ## Ön Koşullar
 
 - **Ansible Sunucusu**: 1 adet
-- **Ubuntu 20 VM'ler**: Ansible sunucusunun anahtar (key) ile erişebileceği 3 adet.
+- **Ubuntu 22 VM'ler**: Ansible sunucusunun anahtar (key) ile erişebileceği 3 adet.
 
 ## Kurulum Adımları
 

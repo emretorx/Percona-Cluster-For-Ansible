@@ -5,7 +5,7 @@ In this guide, you will learn how to set up the Percona Cluster using Ansible.
 ## Prerequisites
 
 - **Ansible Server**: 1 instance
-- **Ubuntu 20 VMs**: 3 instances that the Ansible server can access via key authentication.
+- **Ubuntu 22 VMs**: 3 instances that the Ansible server can access via key authentication.
 
 ## Installation Steps
 
