@@ -1,7 +1,4 @@
 ---
-- name: Percona Install Tasks
-  hosts: all
-  tasks:
     - name: set timezone to Europe/Istanbul
       command: timedatectl set-timezone Europe/Istanbul
 
